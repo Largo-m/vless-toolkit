@@ -192,6 +192,31 @@ to use in diffs.
 
 ---
 
+## `sort`
+
+Order links without rewriting them.
+
+```bash
+vless-toolkit sort [--by {country,name,host,protocol}] [--reverse] SOURCE...
+```
+
+| Option | Description |
+| --- | --- |
+| `--by` | sort field: `country` (default), `name`, `host`, `protocol` |
+| `--reverse` | reverse the resulting order |
+
+`sort` prints the **original link text**, so client-specific parameters and
+signatures are preserved; it is a reordering tool, not a normaliser. Sorting is
+stable, links whose country cannot be inferred are placed last, and `--by
+protocol` groups links by protocol first, then by country.
+
+```bash
+vless-toolkit sort --by country links.txt > sorted.txt
+vless-toolkit sort --by name --reverse links.txt
+```
+
+---
+
 ## `summary`
 
 Count links, hosts and protocols.

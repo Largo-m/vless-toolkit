@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `vless-toolkit sort` orders links by country, name, host or protocol without
+  rewriting them, with `--reverse` and a stable sort that keeps unknown
+  countries last.
+
 ### Infrastructure
 
 - CI now runs Python 3.9-3.13 on Ubuntu, Windows and macOS, enforces 90% test

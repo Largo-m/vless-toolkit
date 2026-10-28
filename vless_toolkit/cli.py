@@ -20,7 +20,7 @@ from .parser import Link, parse_link, protocol_name, serialize_link
 from .qr import link_to_ascii_qr
 from .redact import redact_records
 from .shadowsocks import Shadowsocks
-from .stats import summarize_records
+from .stats import country_for_record, summarize_records
 from .subscription import decode_subscription, encode_subscription
 from .table import color_enabled, render_records_table, render_table
 from .trojan import Trojan
@@ -297,6 +297,34 @@ def _cmd_normalize(args: argparse.Namespace) -> int:
     return 0
 
 
+def _sort_key(record: Link, field: str) -> tuple[object, ...]:
+    """Return a stable, human-sensible sort key for one record."""
+    country = country_for_record(record)
+    known_country = country != "Unknown"
+    name = record.name.casefold()
+    if field == "name":
+        return (name, record.host.casefold(), record.port)
+    if field == "host":
+        return (record.host.casefold(), record.port, name)
+    if field == "protocol":
+        return (protocol_name(record), not known_country, country, name)
+    return (not known_country, country, name, record.host.casefold())
+
+
+def _cmd_sort(args: argparse.Namespace) -> int:
+    """Print the links ordered by country, name, host or protocol."""
+    ordered: list[tuple[str, Link]] = []
+    for index, link in enumerate(_load_links(args.sources), start=1):
+        try:
+            ordered.append((link, parse_link(link)))
+        except LinkParseError as exc:
+            raise CliError(f"link {index}: {exc}") from exc
+    ordered.sort(key=lambda pair: _sort_key(pair[1], args.by), reverse=args.reverse)
+    for link, _ in ordered:
+        print(link)
+    return 0
+
+
 def _cmd_summary(args: argparse.Namespace) -> int:
     stats = summarize_records(_parse_records(args.sources))
     if args.format == "table":
@@ -453,6 +481,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="output format (default: text)",
     )
     summary.set_defaults(func=_cmd_summary)
+
+    sort = commands.add_parser("sort", help="order links by country, name, host or protocol")
+    sort.add_argument("sources", nargs="+", help="link, file path, or - for stdin")
+    sort.add_argument(
+        "--by",
+        choices=["country", "name", "host", "protocol"],
+        default="country",
+        help="sort field (default: country)",
+    )
+    sort.add_argument("--reverse", action="store_true", help="reverse the order")
+    sort.set_defaults(func=_cmd_sort)
 
     qr = commands.add_parser("qr", help="print an ASCII QR code for one link")
     qr.add_argument("source", help="one link, a file with one link, or - for stdin")
