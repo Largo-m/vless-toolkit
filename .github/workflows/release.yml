@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to publish (for example v1.0.0)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve the release tag
+        id: meta
+        shell: bash
+        run: |
+          tag="${{ github.event.inputs.tag }}"
+          if [ -z "$tag" ]; then tag="${{ github.ref_name }}"; fi
+          if [ -z "$tag" ]; then echo "No tag supplied."; exit 1; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.meta.outputs.tag }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]" build
+
+      - name: Lint and test
+        run: |
+          python -m ruff check .
+          python -m pytest -q
+
+      - name: Build the distribution
+        run: python -m build
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.meta.outputs.tag }}" dist/* \
+            --repo "${{ github.repository }}" \
+            --title "vless-toolkit ${{ steps.meta.outputs.tag }}" \
+            --generate-notes \
+            --verify-tag
+
+      - name: Keep the distribution as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vless-toolkit-dist
+          path: dist/
+          retention-days: 14

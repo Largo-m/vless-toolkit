@@ -12,6 +12,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from . import __version__
 from .errors import LinkError, LinkParseError, LinkValidationError
 from .export import records_to_json, records_to_yaml
 from .normalize import dedupe_records, normalize_record
@@ -364,7 +365,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="vless-toolkit",
         description="Parse, build, validate and convert proxy share links locally.",
     )
-    parser.add_argument("--version", action="version", version="vless-toolkit 0.1.0")
+    parser.add_argument("--version", action="version", version=f"vless-toolkit {__version__}")
     parser.add_argument(
         "--no-color",
         action="store_true",
