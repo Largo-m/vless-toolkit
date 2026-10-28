@@ -12,7 +12,7 @@ that callers can pass through settings this library does not interpret yet.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from urllib.parse import parse_qsl, unquote, urlsplit
+from urllib.parse import parse_qsl, quote, unquote, urlencode, urlsplit
 from uuid import UUID
 
 from .errors import LinkParseError, LinkValidationError
@@ -106,6 +106,10 @@ class VLESS:
         """Transport security from the query, defaulting to ``"none"``."""
         return self.params.get("security", "none")
 
+    def __str__(self) -> str:
+        """Serialize this record back to a ``vless://`` share link."""
+        return serialize_vless(self)
+
 
 def _query_pairs(query: str) -> list[tuple[str, str]]:
     """Split a query string, rejecting duplicate names."""
@@ -172,3 +176,26 @@ def parse_vless(link: str) -> VLESS:
         )
     except LinkValidationError as exc:
         raise LinkParseError(str(exc)) from exc
+
+
+def serialize_vless(link: VLESS) -> str:
+    """Serialize a :class:`VLESS` record to a share link.
+
+    Query parameter order is preserved. Values are percent-encoded, and IPv6
+    hosts are wrapped in brackets as required by RFC 3986. The display-name
+    fragment is omitted when empty.
+
+    Raises:
+        LinkValidationError: If ``link`` is not a :class:`VLESS` instance.
+    """
+    if not isinstance(link, VLESS):
+        raise LinkValidationError("serialize_vless expects a VLESS instance")
+
+    host = f"[{link.host}]" if ":" in link.host else link.host
+    link_text = f"vless://{quote(link.uuid, safe='')}@{host}:{link.port}"
+    if link.params:
+        query = urlencode(list(link.params.items()), quote_via=quote, safe="")
+        link_text += f"?{query}"
+    if link.name:
+        link_text += f"#{quote(link.name, safe='')}"
+    return link_text

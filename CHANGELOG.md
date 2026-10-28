@@ -11,3 +11,4 @@ All notable changes to this project are documented here. The format follows
 - Initial project skeleton, packaging metadata and CI workflow.
 - VLESS share-link parser with UUID, host, port, query and display-name
   validation.
+- VLESS serializer with RFC 3986 encoding, IPv6 support and round-trip tests.
