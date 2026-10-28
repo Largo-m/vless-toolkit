@@ -9,30 +9,23 @@ from __future__ import annotations
 
 import argparse
 import sys
-from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
 
 from .errors import LinkError, LinkParseError, LinkValidationError
 from .export import records_to_json, records_to_yaml
 from .normalize import dedupe_records, normalize_record
-from .parser import Link, parse_link, serialize_link
+from .parser import Link, parse_link, protocol_name, serialize_link
 from .qr import link_to_ascii_qr
 from .redact import redact_records
 from .shadowsocks import Shadowsocks
+from .stats import summarize_records
 from .subscription import decode_subscription, encode_subscription
 from .trojan import Trojan
 from .vless import VLESS
 from .vmess import VMess
 
 _SCHEME_PREFIXES = ("vless://", "vmess://", "trojan://", "ss://")
-
-_PROTOCOL_NAMES = {
-    VLESS: "vless",
-    VMess: "vmess",
-    Trojan: "trojan",
-    Shadowsocks: "shadowsocks",
-}
 
 _VMESS_OPTIONS = {
     "network": "network",
@@ -125,7 +118,7 @@ def _parse_records(sources: Sequence[str]) -> list[Link]:
 def _record_lines(record: Link) -> list[str]:
     """Render a record as stable human-readable key/value lines."""
     lines = [
-        f"protocol: {_PROTOCOL_NAMES[type(record)]}",
+        f"protocol: {protocol_name(record)}",
         f"name: {record.name}",
         f"host: {record.host}",
         f"port: {record.port}",
@@ -263,7 +256,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
             print(f"invalid #{index}: {exc}", file=sys.stderr)
         else:
             label = record.name or record.host
-            print(f"ok #{index}: {_PROTOCOL_NAMES[type(record)]} {label}")
+            print(f"ok #{index}: {protocol_name(record)} {label}")
     if failures:
         print(f"{failures} of {len(links)} link(s) invalid", file=sys.stderr)
         return 1
@@ -291,14 +284,18 @@ def _cmd_normalize(args: argparse.Namespace) -> int:
 
 
 def _cmd_summary(args: argparse.Namespace) -> int:
-    records = _parse_records(args.sources)
-    protocol_counts = Counter(_PROTOCOL_NAMES[type(record)] for record in records)
-    hosts = {record.host for record in records}
-    print(f"total: {len(records)}")
-    print(f"unique hosts: {len(hosts)}")
+    stats = summarize_records(_parse_records(args.sources))
+    print(f"total: {stats.total}")
+    print(f"unique hosts: {stats.unique_hosts}")
     print("by protocol:")
-    for protocol, count in sorted(protocol_counts.items()):
+    for protocol, count in stats.by_protocol.items():
         print(f"  {protocol}: {count}")
+    print("by country:")
+    for country, count in stats.by_country.items():
+        print(f"  {country}: {count}")
+    print("by country/protocol:")
+    for (country, protocol), count in stats.by_country_protocol.items():
+        print(f"  {country}/{protocol}: {count}")
     return 0
 
 

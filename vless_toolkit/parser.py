@@ -14,6 +14,25 @@ Link = Union[VLESS, VMess, Trojan, Shadowsocks]
 
 SUPPORTED_SCHEMES = ("vless", "vmess", "trojan", "ss")
 
+_PROTOCOL_NAMES = {
+    VLESS: "vless",
+    VMess: "vmess",
+    Trojan: "trojan",
+    Shadowsocks: "shadowsocks",
+}
+
+
+def protocol_name(record: Link) -> str:
+    """Return the friendly protocol name for a record.
+
+    Raises:
+        LinkValidationError: If ``record`` is not a supported record type.
+    """
+    name = _PROTOCOL_NAMES.get(type(record))
+    if name is None:
+        raise LinkValidationError(f"unsupported record type: {type(record).__name__}")
+    return name
+
 
 def parse_link(link: str) -> Link:
     """Parse any supported share link by dispatching on its scheme.
