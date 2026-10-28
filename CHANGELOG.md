@@ -14,3 +14,5 @@ All notable changes to this project are documented here. The format follows
 - VLESS serializer with RFC 3986 encoding, IPv6 support and round-trip tests.
 - VMess base64-JSON codec with unknown-field preservation and duplicate-key
   rejection.
+- Trojan share-link parser and serializer with encoded passwords and
+  credential-safe reprs.
