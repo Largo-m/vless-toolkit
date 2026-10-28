@@ -237,6 +237,8 @@ already copied somewhere unsafe. Read [SECURITY.md](SECURITY.md) and
 python -m pytest -q
 python -m ruff check .
 python -m pytest --cov=vless_toolkit --cov-report=term-missing
+pre-commit install
+pre-commit run --all-files
 ```
 
 Contributions follow [CONTRIBUTING.md](CONTRIBUTING.md). Never include real

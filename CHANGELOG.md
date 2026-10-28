@@ -36,6 +36,12 @@ All notable changes to this project are documented here. The format follows
 - Unicode-aware ASCII tables for ``parse`` and ``summary`` with credential-free
   output, TTY color detection and ``--color``/``--no-color`` overrides.
 
+### Infrastructure
+
+- CI now runs Python 3.9-3.13 on Ubuntu, Windows and macOS, enforces 90% test
+  coverage, builds/install-checks distributions and includes a tag-based GitHub
+  release workflow, Dependabot and local pre-commit hooks.
+
 ### Documentation
 
 - Expanded README with feature overview, installation, library and CLI examples,
