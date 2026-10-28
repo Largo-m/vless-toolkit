@@ -248,6 +248,19 @@ def test_summary(capsys: pytest.CaptureFixture[str]) -> None:
     assert "unique hosts: 2" in output
     assert "trojan: 1" in output
     assert "vless: 2" in output
+    assert "by country:" in output
+    assert "by country/protocol:" in output
+
+
+def test_summary_groups_by_country(capsys: pytest.CaptureFixture[str]) -> None:
+    us_link = f"vless://{UUID}@us.example.com:443#US%20Node"
+    jp_link = f"vless://{UUID}@jp.example.com:443#JP%20Node"
+    assert main(["summary", us_link, jp_link]) == 0
+    output = capsys.readouterr().out
+    assert "US: 1" in output
+    assert "JP: 1" in output
+    assert "US/vless: 1" in output
+    assert "JP/vless: 1" in output
 
 
 def test_qr_command_outputs_ascii(capsys: pytest.CaptureFixture[str]) -> None:

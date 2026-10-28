@@ -31,3 +31,5 @@ All notable changes to this project are documented here. The format follows
   support.
 - Credential and hostname redaction helpers with free-text log redaction and
   ``--redact``/``--hide-hosts`` CLI flags.
+- Country inference (flags, explicit tags and country names) and summary
+  statistics grouped by country and country/protocol.
