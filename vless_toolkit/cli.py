@@ -15,6 +15,7 @@ from pathlib import Path
 
 from .errors import LinkError, LinkParseError, LinkValidationError
 from .export import records_to_json, records_to_yaml
+from .normalize import dedupe_records, normalize_record
 from .parser import Link, parse_link, serialize_link
 from .qr import link_to_ascii_qr
 from .shadowsocks import Shadowsocks
@@ -267,19 +268,20 @@ def _cmd_validate(args: argparse.Namespace) -> int:
 
 def _cmd_dedupe(args: argparse.Namespace) -> int:
     records = _parse_records(args.sources)
-    seen: set[str] = set()
-    unique: list[str] = []
-    for record in records:
-        serialized = serialize_link(record)
-        if serialized not in seen:
-            seen.add(serialized)
-            unique.append(serialized)
-    for link in unique:
-        print(link)
+    unique = dedupe_records(records, include_names=args.keep_names)
+    for record in unique:
+        print(serialize_link(record))
     print(
         f"removed {len(records) - len(unique)} duplicate(s); {len(unique)} unique",
         file=sys.stderr,
     )
+    return 0
+
+
+def _cmd_normalize(args: argparse.Namespace) -> int:
+    records = _parse_records(args.sources)
+    for record in records:
+        print(serialize_link(normalize_record(record)))
     return 0
 
 
@@ -354,9 +356,20 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("sources", nargs="+", help="link, file path, or - for stdin")
     validate.set_defaults(func=_cmd_validate)
 
-    dedupe = commands.add_parser("dedupe", help="remove exact duplicate links")
+    dedupe = commands.add_parser(
+        "dedupe", help="remove semantic duplicate links (names ignored by default)"
+    )
     dedupe.add_argument("sources", nargs="+", help="link, file path, or - for stdin")
+    dedupe.add_argument(
+        "--keep-names",
+        action="store_true",
+        help="treat differently named links as distinct",
+    )
     dedupe.set_defaults(func=_cmd_dedupe)
+
+    normalize = commands.add_parser("normalize", help="print canonical link forms")
+    normalize.add_argument("sources", nargs="+", help="link, file path, or - for stdin")
+    normalize.set_defaults(func=_cmd_normalize)
 
     summary = commands.add_parser("summary", help="count links by protocol and host")
     summary.add_argument("sources", nargs="+", help="link, file path, or - for stdin")

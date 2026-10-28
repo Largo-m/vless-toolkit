@@ -2,6 +2,13 @@
 
 from .errors import LinkError, LinkParseError, LinkValidationError
 from .export import record_to_dict, records_to_json, records_to_yaml
+from .normalize import (
+    dedupe_links,
+    dedupe_records,
+    normalize_link,
+    normalize_record,
+    record_fingerprint,
+)
 from .parser import SUPPORTED_SCHEMES, parse_link, serialize_link
 from .qr import QRCode, encode_qr, link_to_ascii_qr, qr_to_ascii
 from .shadowsocks import Shadowsocks, parse_shadowsocks, serialize_shadowsocks
@@ -24,9 +31,13 @@ __all__ = [
     "VMess",
     "__version__",
     "decode_subscription",
+    "dedupe_links",
+    "dedupe_records",
     "encode_qr",
     "encode_subscription",
     "link_to_ascii_qr",
+    "normalize_link",
+    "normalize_record",
     "parse_link",
     "parse_shadowsocks",
     "parse_subscription",
@@ -34,6 +45,7 @@ __all__ = [
     "parse_vless",
     "parse_vmess",
     "qr_to_ascii",
+    "record_fingerprint",
     "record_to_dict",
     "records_to_json",
     "records_to_yaml",

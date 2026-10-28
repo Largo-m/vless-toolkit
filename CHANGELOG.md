@@ -26,3 +26,6 @@ All notable changes to this project are documented here. The format follows
   (``--format json|yaml``).
 - Pure-Python byte-mode QR generation (versions 1-10, ECC L), ASCII rendering
   and the ``qr`` CLI command.
+- Link normalization, credential-safe fingerprints and semantic deduplication
+  (with optional display-name sensitivity), plus ``normalize``/``dedupe`` CLI
+  support.
