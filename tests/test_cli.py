@@ -311,3 +311,12 @@ def test_invalid_set_argument(capsys: pytest.CaptureFixture[str]) -> None:
     )
     assert status == 2
     assert "expected KEY=VALUE" in capsys.readouterr().err
+
+
+def test_version_flag_reports_the_package_version(capsys: pytest.CaptureFixture[str]) -> None:
+    from vless_toolkit import __version__
+
+    with pytest.raises(SystemExit) as exit_info:
+        main(["--version"])
+    assert exit_info.value.code == 0
+    assert capsys.readouterr().out.strip() == f"vless-toolkit {__version__}"

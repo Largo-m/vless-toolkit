@@ -2,51 +2,99 @@ name: Release
 
 on:
   push:
-    tags: ["v*"]
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to publish (for example v1.0.0)"
+        required: true
 
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
-    name: Build and publish GitHub release
+    name: build and publish
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: Resolve the release tag
+        id: meta
+        shell: bash
+        run: |
+          tag="${{ github.event.inputs.tag }}"
+          if [ -z "$tag" ]; then tag="${{ github.ref_name }}"; fi
+          if [ -z "$tag" ]; then echo "No tag supplied."; exit 1; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
+          ref: ${{ steps.meta.outputs.tag }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-      - name: Build distributions
+
+      - name: Install build tooling
         run: |
-          python -m pip install build
-          python -m build
-      - name: Check version matches tag
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]" build
+
+      - name: Lint and test
         run: |
+          python -m ruff check .
+          python -m pytest -q
+
+      - name: Build the distribution
+        run: python -m build
+
+      - name: Verify wheel version and entry point
+        env:
+          RELEASE_TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          python -m pip install --force-reinstall dist/*.whl
+          python -m pip check
           python - <<'PY'
           import os
-          import tomllib
+          import re
+          from pathlib import Path
 
           import vless_toolkit
 
-          tag = os.environ["GITHUB_REF_NAME"].removeprefix("v")
-          with open("pyproject.toml", "rb") as handle:
-              project_version = tomllib.load(handle)["project"]["version"]
+          tag = os.environ["RELEASE_TAG"].removeprefix("v")
+          text = Path("pyproject.toml").read_text(encoding="utf-8")
+          match = re.search(r'(?m)^version = "([^"]+)"', text)
+          assert match is not None
+          project_version = match.group(1)
           assert tag == project_version == vless_toolkit.__version__, (
               tag,
               project_version,
               vless_toolkit.__version__,
           )
-          print(f"version {tag} matches tag and package metadata")
+          print(f"wheel version {tag} matches tag and package metadata")
           PY
-      - name: Smoke-test wheel
-        run: |
-          python -m pip install dist/*.whl
           vless-toolkit --version
-      - name: Create release
+
+      - name: Publish the GitHub release
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" dist/* --generate-notes --verify-tag
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.meta.outputs.tag }}" dist/* \
+            --repo "${{ github.repository }}" \
+            --title "vless-toolkit ${{ steps.meta.outputs.tag }}" \
+            --generate-notes \
+            --verify-tag
+
+      - name: Keep the distribution as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vless-toolkit-dist
+          path: dist/
+          retention-days: 14

@@ -32,7 +32,7 @@ from .trojan import Trojan, parse_trojan, serialize_trojan
 from .vless import VLESS, parse_vless, serialize_vless
 from .vmess import VMess, parse_vmess, serialize_vmess
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "SUPPORTED_SCHEMES",

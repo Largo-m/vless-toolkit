@@ -1,7 +1,9 @@
-from importlib.metadata import PackageNotFoundError, version
+import re
+from pathlib import Path
 
-import pytest
 from vless_toolkit import __version__
+
+PYPROJECT = Path(__file__).resolve().parent.parent / "pyproject.toml"
 
 
 def test_package_exposes_a_semantic_version() -> None:
@@ -10,9 +12,10 @@ def test_package_exposes_a_semantic_version() -> None:
     assert all(part.isdigit() for part in parts)
 
 
-def test_distribution_metadata_matches_runtime_version() -> None:
-    try:
-        installed = version("vless-toolkit")
-    except PackageNotFoundError:
-        pytest.skip("package metadata is unavailable in this environment")
-    assert installed == __version__
+def test_pyproject_version_matches_runtime_version() -> None:
+    match = re.search(
+        r'(?m)^version\s*=\s*"([^"]+)"',
+        PYPROJECT.read_text(encoding="utf-8"),
+    )
+    assert match is not None
+    assert match.group(1) == __version__

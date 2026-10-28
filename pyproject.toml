@@ -4,17 +4,29 @@ build-backend = "hatchling.build"
 
 [project]
 name = "vless-toolkit"
-version = "0.1.0"
-description = "Parse, validate, build and convert VLESS / VMess / Trojan / Shadowsocks share links and subscription payloads — dependency-free Python library and CLI."
+version = "1.0.0"
+description = "Parse, validate, build and convert VLESS, VMess, Trojan and Shadowsocks share links and base64 subscriptions - offline, with zero dependencies."
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Largo-m" }]
 requires-python = ">=3.9"
-keywords = ["vless", "vmess", "trojan", "shadowsocks", "vpn", "subscription", "cli"]
+keywords = [
+  "vless",
+  "vmess",
+  "trojan",
+  "shadowsocks",
+  "v2ray",
+  "xray",
+  "subscription",
+  "share-link",
+  "proxy",
+  "cli",
+]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Developers",
+  "Intended Audience :: System Administrators",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
@@ -43,6 +55,8 @@ vless-toolkit = "vless_toolkit.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/Largo-m/vless-toolkit"
+Repository = "https://github.com/Largo-m/vless-toolkit"
+Documentation = "https://github.com/Largo-m/vless-toolkit/blob/main/docs/API.md"
 Issues = "https://github.com/Largo-m/vless-toolkit/issues"
 Changelog = "https://github.com/Largo-m/vless-toolkit/blob/main/CHANGELOG.md"
 
