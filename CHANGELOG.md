@@ -36,6 +36,11 @@ All notable changes to this project are documented here. The format follows
 - Unicode-aware ASCII tables for ``parse`` and ``summary`` with credential-free
   output, TTY color detection and ``--color``/``--no-color`` overrides.
 
+### Documentation
+
+- Expanded README with feature overview, installation, library and CLI examples,
+  supported formats and limitations, plus detailed CLI and security guides.
+
 ### Tests
 
 - Deterministic property-style tests covering randomized round trips for all
