@@ -9,3 +9,5 @@ All notable changes to this project are documented here. The format follows
 ### Added
 
 - Initial project skeleton, packaging metadata and CI workflow.
+- VLESS share-link parser with UUID, host, port, query and display-name
+  validation.
