@@ -519,7 +519,7 @@ vless_toolkit/
 ├── qr.py              pure-Python QR encoder + ASCII renderer
 └── cli.py             argparse command suite
 
-tests/                 157 tests across parsing, building, redaction, exports, QR
+tests/                 208 tests across parsing, building, redaction, exports, QR
 docs/                  CLI reference, format rules, API reference
 ```
 
@@ -533,12 +533,14 @@ cd vless-toolkit
 python -m pip install -e ".[dev]"
 
 python -m ruff check .
-python -m pytest -q          # 157 tests
-python -m pytest -q --cov=vless_toolkit
+python -m pytest -q
+python -m pytest -q --cov=vless_toolkit --cov-report=term-missing
+pre-commit install
+pre-commit run --all-files
 ```
 
-CI runs the suite on Ubuntu, Windows and macOS for Python 3.9 and 3.12, with
-linting on every push and pull request.
+CI runs the suite on Ubuntu, Windows and macOS for Python 3.9 through 3.13,
+with a 90% coverage gate and linting on every push and pull request.
 
 Pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 

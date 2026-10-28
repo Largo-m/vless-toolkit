@@ -9,7 +9,10 @@ readable and dependency-free at runtime.
 python -m pip install -e ".[dev]"
 python -m pytest -q
 python -m ruff check .
+pre-commit install
 ```
+
+The local pre-commit hook runs ruff and the full test suite before a push.
 
 ## Pull requests
 

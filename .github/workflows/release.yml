@@ -55,6 +55,33 @@ jobs:
       - name: Build the distribution
         run: python -m build
 
+      - name: Verify wheel version and entry point
+        env:
+          RELEASE_TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          python -m pip install --force-reinstall dist/*.whl
+          python -m pip check
+          python - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          import vless_toolkit
+
+          tag = os.environ["RELEASE_TAG"].removeprefix("v")
+          text = Path("pyproject.toml").read_text(encoding="utf-8")
+          match = re.search(r'(?m)^version = "([^"]+)"', text)
+          assert match is not None
+          project_version = match.group(1)
+          assert tag == project_version == vless_toolkit.__version__, (
+              tag,
+              project_version,
+              vless_toolkit.__version__,
+          )
+          print(f"wheel version {tag} matches tag and package metadata")
+          PY
+          vless-toolkit --version
+
       - name: Publish the GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

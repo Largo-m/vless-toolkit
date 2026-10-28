@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Infrastructure
+
+- CI now runs Python 3.9-3.13 on Ubuntu, Windows and macOS, enforces 90% test
+  coverage, builds and install-checks distributions, and runs local pre-commit
+  hooks. Dependabot tracks Python and GitHub Actions updates.
+
 ## [1.0.0] - 2026-10-29
 
 ### Added
