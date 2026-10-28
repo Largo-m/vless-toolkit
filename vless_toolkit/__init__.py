@@ -11,6 +11,13 @@ from .normalize import (
 )
 from .parser import SUPPORTED_SCHEMES, parse_link, serialize_link
 from .qr import QRCode, encode_qr, link_to_ascii_qr, qr_to_ascii
+from .redact import (
+    redact_link,
+    redact_record,
+    redact_records,
+    redact_secret,
+    redact_text,
+)
 from .shadowsocks import Shadowsocks, parse_shadowsocks, serialize_shadowsocks
 from .subscription import decode_subscription, encode_subscription, parse_subscription
 from .trojan import Trojan, parse_trojan, serialize_trojan
@@ -49,6 +56,11 @@ __all__ = [
     "record_to_dict",
     "records_to_json",
     "records_to_yaml",
+    "redact_link",
+    "redact_record",
+    "redact_records",
+    "redact_secret",
+    "redact_text",
     "serialize_link",
     "serialize_shadowsocks",
     "serialize_trojan",

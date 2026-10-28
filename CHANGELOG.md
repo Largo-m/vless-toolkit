@@ -29,3 +29,5 @@ All notable changes to this project are documented here. The format follows
 - Link normalization, credential-safe fingerprints and semantic deduplication
   (with optional display-name sensitivity), plus ``normalize``/``dedupe`` CLI
   support.
+- Credential and hostname redaction helpers with free-text log redaction and
+  ``--redact``/``--hide-hosts`` CLI flags.

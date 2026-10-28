@@ -18,6 +18,7 @@ from .export import records_to_json, records_to_yaml
 from .normalize import dedupe_records, normalize_record
 from .parser import Link, parse_link, serialize_link
 from .qr import link_to_ascii_qr
+from .redact import redact_records
 from .shadowsocks import Shadowsocks
 from .subscription import decode_subscription, encode_subscription
 from .trojan import Trojan
@@ -151,6 +152,8 @@ def _record_lines(record: Link) -> list[str]:
 
 def _cmd_parse(args: argparse.Namespace) -> int:
     records = _parse_records(args.sources)
+    if args.redact or args.hide_hosts:
+        records = redact_records(records, keep_host=not args.hide_hosts)
     if args.format == "json":
         print(records_to_json(records))
         return 0
@@ -235,6 +238,8 @@ def _cmd_build(args: argparse.Namespace) -> int:
 
 def _cmd_convert(args: argparse.Namespace) -> int:
     records = _parse_records(args.sources)
+    if args.redact or args.hide_hosts:
+        records = redact_records(records, keep_host=not args.hide_hosts)
     if args.subscription:
         print(encode_subscription(records, urlsafe=args.urlsafe, padding=not args.no_padding))
     elif args.format == "json":
@@ -326,6 +331,12 @@ def build_parser() -> argparse.ArgumentParser:
         default="text",
         help="output format (default: text)",
     )
+    parse.add_argument("--redact", action="store_true", help="mask credentials in output")
+    parse.add_argument(
+        "--hide-hosts",
+        action="store_true",
+        help="also replace server hosts (implies --redact)",
+    )
     parse.set_defaults(func=_cmd_parse)
 
     build = commands.add_parser("build", help="build a share link from fields")
@@ -349,6 +360,12 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["links", "json", "yaml"],
         default="links",
         help="output format (default: links)",
+    )
+    convert.add_argument("--redact", action="store_true", help="mask credentials in output")
+    convert.add_argument(
+        "--hide-hosts",
+        action="store_true",
+        help="also replace server hosts (implies --redact)",
     )
     convert.set_defaults(func=_cmd_convert)
 
