@@ -206,6 +206,23 @@ def test_summary(capsys: pytest.CaptureFixture[str]) -> None:
     assert "vless: 2" in output
 
 
+def test_qr_command_outputs_ascii(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["qr", VLESS_LINK, "--border", "2"]) == 0
+    output = capsys.readouterr().out
+    assert "##" in output
+    assert output.isascii()
+    assert all(line == line.rstrip() for line in output.splitlines())
+
+
+def test_qr_command_rejects_multiple_links(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    path = tmp_path / "many.txt"
+    path.write_text(f"{VLESS_LINK}\n{TROJAN_LINK}\n", encoding="utf-8")
+    assert main(["qr", str(path)]) == 2
+    assert "requires exactly one link" in capsys.readouterr().err
+
+
 def test_stdin_source(
     capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -16,6 +16,7 @@ from pathlib import Path
 from .errors import LinkError, LinkParseError, LinkValidationError
 from .export import records_to_json, records_to_yaml
 from .parser import Link, parse_link, serialize_link
+from .qr import link_to_ascii_qr
 from .shadowsocks import Shadowsocks
 from .subscription import decode_subscription, encode_subscription
 from .trojan import Trojan
@@ -294,6 +295,18 @@ def _cmd_summary(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_qr(args: argparse.Namespace) -> int:
+    links = _load_links([args.source])
+    if len(links) != 1:
+        raise CliError(f"QR output requires exactly one link, found {len(links)}")
+    try:
+        record = parse_link(links[0])
+    except LinkParseError as exc:
+        raise CliError(str(exc)) from exc
+    print(link_to_ascii_qr(serialize_link(record), border=args.border), end="")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the argparse command tree."""
     parser = argparse.ArgumentParser(
@@ -348,6 +361,17 @@ def build_parser() -> argparse.ArgumentParser:
     summary = commands.add_parser("summary", help="count links by protocol and host")
     summary.add_argument("sources", nargs="+", help="link, file path, or - for stdin")
     summary.set_defaults(func=_cmd_summary)
+
+    qr = commands.add_parser("qr", help="print an ASCII QR code for one link")
+    qr.add_argument("source", help="one link, a file with one link, or - for stdin")
+    qr.add_argument(
+        "--border",
+        type=int,
+        default=4,
+        metavar="N",
+        help="quiet-zone width in modules, 0-16 (default: 4)",
+    )
+    qr.set_defaults(func=_cmd_qr)
     return parser
 
 
