@@ -96,7 +96,8 @@ and CI checks.
 - [x] Summarise a subscription: totals, unique hosts, protocol counts, grouping by country and by country/protocol
 - [x] Country inference from flag emoji, country names and explicit tags (`infer_country`)
 - [x] Unicode-aware ASCII tables with optional colour, `--color`/`--no-color` and `NO_COLOR` support
-- [x] 207 tests, Ruff-enforced, CI on Linux, Windows and macOS
+- [x] Sort a subscription by country, name, host or protocol without rewriting the links
+- [x] 214 tests, Ruff-enforced, CI on Linux, Windows and macOS
 - [x] `py.typed`, fully type-annotated public API
 - [x] No network access, no telemetry, no third-party runtime imports
 
@@ -258,6 +259,24 @@ $ vless-toolkit dedupe links.txt
 removed 1 duplicate(s); 1 unique
 vless://11111111-1111-4111-8111-111111111111@de.example.com:443?flow=xtls-rprx-vision&fp=chrome&pb=PUBLICKEY&security=reality&sid=0123456789abcdef&sni=www.example.com&type=tcp#Frankfurt
 ```
+
+### Sort a subscription
+
+`sort` reorders links and prints them **unchanged** — the original text, not a
+normalised form, so signatures and client-specific parameters survive.
+
+```bash
+$ vless-toolkit sort --by country links.txt
+vless://11111111-1111-4111-8111-111111111111@de.example.com:443?security=tls#Germany%20Frankfurt
+trojan://secret-password@jp.example.com:443?security=tls#Japan%20Tokyo
+vless://11111111-1111-4111-8111-111111111111@nl.example.com:443?security=tls#Netherlands%20Amsterdam
+
+$ vless-toolkit sort --by name --reverse links.txt
+```
+
+Sort fields: `country` (default), `name`, `host`, `protocol`. Links whose country
+cannot be inferred go last instead of cluttering the top of the list, and the
+sort is stable, so equally ranked links keep their original order.
 
 ### Convert to JSON, YAML or a base64 subscription
 
