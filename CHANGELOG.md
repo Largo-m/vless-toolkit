@@ -18,3 +18,5 @@ All notable changes to this project are documented here. The format follows
   credential-safe reprs.
 - Shadowsocks SIP002 and legacy codecs with plugin support and
   credential-safe reprs.
+- Unified link dispatch plus base64 subscription decoding/encoding with
+  plain-text and unpadded URL-safe support.
