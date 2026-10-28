@@ -14,6 +14,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from .errors import LinkError, LinkParseError, LinkValidationError
+from .export import records_to_json, records_to_yaml
 from .parser import Link, parse_link, serialize_link
 from .shadowsocks import Shadowsocks
 from .subscription import decode_subscription, encode_subscription
@@ -148,6 +149,12 @@ def _record_lines(record: Link) -> list[str]:
 
 def _cmd_parse(args: argparse.Namespace) -> int:
     records = _parse_records(args.sources)
+    if args.format == "json":
+        print(records_to_json(records))
+        return 0
+    if args.format == "yaml":
+        print(records_to_yaml(records), end="")
+        return 0
     for index, record in enumerate(records):
         if index:
             print()
@@ -228,6 +235,10 @@ def _cmd_convert(args: argparse.Namespace) -> int:
     records = _parse_records(args.sources)
     if args.subscription:
         print(encode_subscription(records, urlsafe=args.urlsafe, padding=not args.no_padding))
+    elif args.format == "json":
+        print(records_to_json(records))
+    elif args.format == "yaml":
+        print(records_to_yaml(records), end="")
     else:
         for record in records:
             print(serialize_link(record))
@@ -294,6 +305,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     parse = commands.add_parser("parse", help="show parsed fields for links")
     parse.add_argument("sources", nargs="+", help="link, file path, or - for stdin")
+    parse.add_argument(
+        "--format",
+        choices=["text", "json", "yaml"],
+        default="text",
+        help="output format (default: text)",
+    )
     parse.set_defaults(func=_cmd_parse)
 
     build = commands.add_parser("build", help="build a share link from fields")
@@ -312,6 +329,12 @@ def build_parser() -> argparse.ArgumentParser:
     convert.add_argument("--subscription", action="store_true", help="emit base64 subscription")
     convert.add_argument("--urlsafe", action="store_true", help="URL-safe subscription base64")
     convert.add_argument("--no-padding", action="store_true", help="omit subscription padding")
+    convert.add_argument(
+        "--format",
+        choices=["links", "json", "yaml"],
+        default="links",
+        help="output format (default: links)",
+    )
     convert.set_defaults(func=_cmd_convert)
 
     validate = commands.add_parser("validate", help="validate links and report failures")
