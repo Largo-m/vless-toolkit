@@ -16,3 +16,5 @@ All notable changes to this project are documented here. The format follows
   rejection.
 - Trojan share-link parser and serializer with encoded passwords and
   credential-safe reprs.
+- Shadowsocks SIP002 and legacy codecs with plugin support and
+  credential-safe reprs.
