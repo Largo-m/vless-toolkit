@@ -218,6 +218,29 @@ def test_normalize_command(capsys: pytest.CaptureFixture[str]) -> None:
     assert output == f"vless://{UUID}@example.com:443?security=tls&type=ws#Node"
 
 
+def test_parse_redaction_flags(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["parse", TROJAN_LINK, "--redact"]) == 0
+    output = capsys.readouterr().out
+    assert "secret" not in output
+    assert "[REDACTED]" in output
+    assert "trojan.example.com" in output
+
+    assert main(["parse", TROJAN_LINK, "--hide-hosts"]) == 0
+    output = capsys.readouterr().out
+    assert "trojan.example.com" not in output
+    assert "redacted.invalid" in output
+
+
+def test_convert_redacted_subscription(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["convert", TROJAN_LINK, "--redact", "--subscription"]) == 0
+    payload = capsys.readouterr().out.strip()
+    links = decode_subscription(payload)
+    assert len(links) == 1
+    parsed = parse_link(links[0])
+    assert parsed.password == "[REDACTED]"
+    assert parsed.host == "trojan.example.com"
+
+
 def test_summary(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["summary", VLESS_LINK, TROJAN_LINK, VLESS_LINK]) == 0
     output = capsys.readouterr().out
