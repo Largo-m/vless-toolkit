@@ -21,6 +21,7 @@ from .redact import redact_records
 from .shadowsocks import Shadowsocks
 from .stats import summarize_records
 from .subscription import decode_subscription, encode_subscription
+from .table import color_enabled, render_records_table, render_table
 from .trojan import Trojan
 from .vless import VLESS
 from .vmess import VMess
@@ -143,10 +144,22 @@ def _record_lines(record: Link) -> list[str]:
     return lines
 
 
+def _color_enabled(args: argparse.Namespace) -> bool:
+    """Apply CLI and environment color preferences for stdout."""
+    return color_enabled(
+        sys.stdout,
+        no_color=args.no_color,
+        force_color=args.force_color,
+    )
+
+
 def _cmd_parse(args: argparse.Namespace) -> int:
     records = _parse_records(args.sources)
     if args.redact or args.hide_hosts:
         records = redact_records(records, keep_host=not args.hide_hosts)
+    if args.format == "table":
+        print(render_records_table(records, color=_color_enabled(args)))
+        return 0
     if args.format == "json":
         print(records_to_json(records))
         return 0
@@ -285,6 +298,40 @@ def _cmd_normalize(args: argparse.Namespace) -> int:
 
 def _cmd_summary(args: argparse.Namespace) -> int:
     stats = summarize_records(_parse_records(args.sources))
+    if args.format == "table":
+        color = _color_enabled(args)
+        print(f"total: {stats.total}  unique hosts: {stats.unique_hosts}")
+        print()
+        print(
+            render_table(
+                ("Protocol", "Count"),
+                stats.by_protocol.items(),
+                aligns=("l", "r"),
+                color=color,
+            )
+        )
+        print()
+        print(
+            render_table(
+                ("Country", "Count"),
+                stats.by_country.items(),
+                aligns=("l", "r"),
+                color=color,
+            )
+        )
+        print()
+        print(
+            render_table(
+                ("Country", "Protocol", "Count"),
+                (
+                    (country, protocol, count)
+                    for (country, protocol), count in stats.by_country_protocol.items()
+                ),
+                aligns=("l", "l", "r"),
+                color=color,
+            )
+        )
+        return 0
     print(f"total: {stats.total}")
     print(f"unique hosts: {stats.unique_hosts}")
     print("by protocol:")
@@ -318,13 +365,24 @@ def build_parser() -> argparse.ArgumentParser:
         description="Parse, build, validate and convert proxy share links locally.",
     )
     parser.add_argument("--version", action="version", version="vless-toolkit 0.1.0")
+    parser.add_argument(
+        "--no-color",
+        action="store_true",
+        help="disable ANSI colors (NO_COLOR is also honored)",
+    )
+    parser.add_argument(
+        "--color",
+        dest="force_color",
+        action="store_true",
+        help="force ANSI colors even when stdout is not a TTY",
+    )
     commands = parser.add_subparsers(dest="command", required=True)
 
     parse = commands.add_parser("parse", help="show parsed fields for links")
     parse.add_argument("sources", nargs="+", help="link, file path, or - for stdin")
     parse.add_argument(
         "--format",
-        choices=["text", "json", "yaml"],
+        choices=["text", "table", "json", "yaml"],
         default="text",
         help="output format (default: text)",
     )
@@ -387,6 +445,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     summary = commands.add_parser("summary", help="count links by protocol and host")
     summary.add_argument("sources", nargs="+", help="link, file path, or - for stdin")
+    summary.add_argument(
+        "--format",
+        choices=["text", "table"],
+        default="text",
+        help="output format (default: text)",
+    )
     summary.set_defaults(func=_cmd_summary)
 
     qr = commands.add_parser("qr", help="print an ASCII QR code for one link")

@@ -33,3 +33,10 @@ All notable changes to this project are documented here. The format follows
   ``--redact``/``--hide-hosts`` CLI flags.
 - Country inference (flags, explicit tags and country names) and summary
   statistics grouped by country and country/protocol.
+- Unicode-aware ASCII tables for ``parse`` and ``summary`` with credential-free
+  output, TTY color detection and ``--color``/``--no-color`` overrides.
+
+### Tests
+
+- Deterministic property-style tests covering randomized round trips for all
+  protocols and subscription encodings.

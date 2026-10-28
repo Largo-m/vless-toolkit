@@ -27,6 +27,7 @@ from .stats import (
     summarize_records,
 )
 from .subscription import decode_subscription, encode_subscription, parse_subscription
+from .table import color_enabled, display_width, render_records_table, render_table
 from .trojan import Trojan, parse_trojan, serialize_trojan
 from .vless import VLESS, parse_vless, serialize_vless
 from .vmess import VMess, parse_vmess, serialize_vmess
@@ -46,10 +47,12 @@ __all__ = [
     "Trojan",
     "VMess",
     "__version__",
+    "color_enabled",
     "country_for_record",
     "decode_subscription",
     "dedupe_links",
     "dedupe_records",
+    "display_width",
     "encode_qr",
     "encode_subscription",
     "infer_country",
@@ -73,6 +76,8 @@ __all__ = [
     "redact_records",
     "redact_secret",
     "redact_text",
+    "render_records_table",
+    "render_table",
     "serialize_link",
     "serialize_shadowsocks",
     "serialize_trojan",
