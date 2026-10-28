@@ -197,6 +197,27 @@ def test_dedupe_exact_duplicates(capsys: pytest.CaptureFixture[str]) -> None:
     assert "removed 1 duplicate" in captured.err
 
 
+def test_dedupe_ignores_names_and_parameter_order(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    first = f"vless://{UUID}@EXAMPLE.com:443?security=tls&type=ws#First"
+    second = f"vless://{UUID}@example.com:443?type=WS&security=TLS#Second"
+    assert main(["dedupe", first, second]) == 0
+    captured = capsys.readouterr()
+    assert len(captured.out.strip().splitlines()) == 1
+    assert "#First" in captured.out
+
+    assert main(["dedupe", "--keep-names", first, second]) == 0
+    assert len(capsys.readouterr().out.strip().splitlines()) == 2
+
+
+def test_normalize_command(capsys: pytest.CaptureFixture[str]) -> None:
+    link = f"vless://{UUID}@EXAMPLE.com:443?type=WS&security=TLS#Node"
+    assert main(["normalize", link]) == 0
+    output = capsys.readouterr().out.strip()
+    assert output == f"vless://{UUID}@example.com:443?security=tls&type=ws#Node"
+
+
 def test_summary(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["summary", VLESS_LINK, TROJAN_LINK, VLESS_LINK]) == 0
     output = capsys.readouterr().out
