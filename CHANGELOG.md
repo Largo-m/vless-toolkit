@@ -22,3 +22,5 @@ All notable changes to this project are documented here. The format follows
   plain-text and unpadded URL-safe support.
 - ``vless-toolkit`` CLI with ``parse``, ``build``, ``convert``, ``validate``,
   ``dedupe`` and ``summary`` commands, file/stdin input and no network access.
+- JSON and dependency-free YAML export via the library and CLI
+  (``--format json|yaml``).

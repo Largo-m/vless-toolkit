@@ -1,6 +1,7 @@
 """Dependency-free tools for VLESS, VMess, Trojan and Shadowsocks links."""
 
 from .errors import LinkError, LinkParseError, LinkValidationError
+from .export import record_to_dict, records_to_json, records_to_yaml
 from .parser import SUPPORTED_SCHEMES, parse_link, serialize_link
 from .shadowsocks import Shadowsocks, parse_shadowsocks, serialize_shadowsocks
 from .subscription import decode_subscription, encode_subscription, parse_subscription
@@ -28,6 +29,9 @@ __all__ = [
     "parse_trojan",
     "parse_vless",
     "parse_vmess",
+    "record_to_dict",
+    "records_to_json",
+    "records_to_yaml",
     "serialize_link",
     "serialize_shadowsocks",
     "serialize_trojan",

@@ -1,4 +1,5 @@
 import io
+import json
 import sys
 from pathlib import Path
 
@@ -21,6 +22,25 @@ def test_parse_command_outputs_fields(capsys: pytest.CaptureFixture[str]) -> Non
     assert "port: 443" in output
     assert f"uuid: {UUID}" in output
     assert "security: tls" in output
+
+
+def test_parse_json_and_yaml_formats(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["parse", VLESS_LINK, "--format", "json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload[0]["protocol"] == "vless"
+    assert payload[0]["host"] == "vless.example.com"
+
+    assert main(["parse", VLESS_LINK, "--format", "yaml"]) == 0
+    assert capsys.readouterr().out.startswith("- protocol: vless\n")
+
+
+def test_convert_json_and_yaml_formats(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["convert", VLESS_LINK, TROJAN_LINK, "--format", "json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert [item["protocol"] for item in payload] == ["vless", "trojan"]
+
+    assert main(["convert", VLESS_LINK, "--format", "yaml"]) == 0
+    assert capsys.readouterr().out.startswith("- protocol: vless\n")
 
 
 def test_build_vless_round_trip(capsys: pytest.CaptureFixture[str]) -> None:
