@@ -24,3 +24,5 @@ All notable changes to this project are documented here. The format follows
   ``dedupe`` and ``summary`` commands, file/stdin input and no network access.
 - JSON and dependency-free YAML export via the library and CLI
   (``--format json|yaml``).
+- Pure-Python byte-mode QR generation (versions 1-10, ECC L), ASCII rendering
+  and the ``qr`` CLI command.
