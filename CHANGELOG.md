@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] - 2026-10-29
 
 ### Added
 
@@ -36,12 +36,33 @@ All notable changes to this project are documented here. The format follows
 - Unicode-aware ASCII tables for ``parse`` and ``summary`` with credential-free
   output, TTY color detection and ``--color``/``--no-color`` overrides.
 
-### Documentation
-
-- Expanded README with feature overview, installation, library and CLI examples,
-  supported formats and limitations, plus detailed CLI and security guides.
-
 ### Tests
 
 - Deterministic property-style tests covering randomized round trips for all
   protocols and subscription encodings.
+
+### Documentation
+
+- Rewritten README with badges, install instructions, real captured CLI output
+  for every command, library quick start, format matrix, redaction table,
+  normalisation semantics, project layout and FAQ.
+- New `docs/API.md` (every public function and typical workflows),
+  `docs/CLI.md` (all eight commands, options, exit codes and recipes),
+  `docs/FORMATS.md` (field-by-field rules, base64 dialects, error messages),
+  `docs/usage.md` (deeper CLI walkthrough and CI recipes) and
+  `docs/security.md` (threat model and explicit non-goals).
+
+### Fixed
+
+- `--version` was hardcoded to `0.1.0` and kept reporting the old version after
+  the bump; it now derives from `__version__` and is covered by a test.
+- Packaging metadata description contained mojibake and the classifier still
+  claimed Beta.
+
+### Changed
+
+- Version bumped to `1.0.0`; the public API is frozen for the `1.x` series.
+- Added `py.typed` documentation to the classifier claim and verified every
+  documented example against the package.
+
+[1.0.0]: https://github.com/Largo-m/vless-toolkit/releases/tag/v1.0.0
