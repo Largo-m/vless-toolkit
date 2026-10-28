@@ -20,3 +20,5 @@ All notable changes to this project are documented here. The format follows
   credential-safe reprs.
 - Unified link dispatch plus base64 subscription decoding/encoding with
   plain-text and unpadded URL-safe support.
+- ``vless-toolkit`` CLI with ``parse``, ``build``, ``convert``, ``validate``,
+  ``dedupe`` and ``summary`` commands, file/stdin input and no network access.
